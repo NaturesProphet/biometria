@@ -18,29 +18,57 @@
 
 LPSGFPM sdk = NULL;
 
-BYTE *GetFinger(BYTE *buffer)
+bool isGoodQuality(BYTE *buffer, DWORD width, DWORD height, long quality)
 {
-  long err;
-  do
+  DWORD img_qlty;
+  long err = sdk->GetImageQuality(width, height, buffer, &img_qlty);
+  if (err != SGFDX_ERROR_NONE || !img_qlty)
   {
-    err = sdk->GetImageEx(buffer, 10000, NULL, 80);
-    if (err != SGFDX_ERROR_NONE)
-    {
-      if (err != SGFDX_ERROR_WRONG_IMAGE)
-      {
-        printf("ERRO - sdk->GetImage(buffer) retornou um código inesperado: %ld\n", err);
-        exit(err);
-      }
-    }
-  } while (err != 0);
-
-  return buffer;
+    printf("ERRO - sdk->GetImageQuality(width, height, buffer, &img_qlty) retornou um código inesperado: %ld\n", err);
+    exit(err);
+  }
+  if (img_qlty < quality)
+  {
+    return false;
+  }
+  else
+  {
+    return true;
+  }
 }
 
-void saveFinger(BYTE *buffer, long size)
+BYTE *GetFinger(BYTE *buffer, DWORD width, DWORD height)
+{
+  long err;
+  err = sdk->GetImageEx(buffer, 5000, NULL, 80);
+  if (err != SGFDX_ERROR_NONE)
+  {
+    if (err == SGFDX_ERROR_TIME_OUT)
+    {
+      printf("Tempo excedido. Tente novamente.\n");
+      exit(err);
+    }
+    else if (err != SGFDX_ERROR_WRONG_IMAGE)
+    {
+      printf("ERRO - sdk->GetImage(buffer) retornou um código inesperado: %ld\n", err);
+      exit(err);
+    }
+  }
+  if (isGoodQuality(buffer, width, height, 75))
+  {
+    return buffer;
+  }
+  else
+  {
+    printf("A Qualidade da imagem não foi aceitável. Tente novamente.\n");
+    exit(-1);
+  }
+}
+
+void saveFinger(BYTE *buffer, DWORD width, DWORD height)
 {
   FILE *fp = fopen("dedo.raw", "wb");
-  fwrite(buffer, sizeof(BYTE), size, fp);
+  fwrite(buffer, sizeof(BYTE), width * height, fp);
   fclose(fp);
   fp = NULL;
   printf("Impressão digital salva com sucesso.\n");
@@ -59,7 +87,7 @@ void ledOn()
 
 void ledOff()
 {
-  // acende o led
+  // apaga o led
   long err = sdk->SetLedOn(false);
   if (err != SGFDX_ERROR_NONE)
   {
@@ -122,11 +150,11 @@ int main(int argc, char **argv)
   ledOn();
 
   printf("METE O DEDO LÁ....\n");
-  imgBuffer1 = GetFinger(imgBuffer1);
+  imgBuffer1 = GetFinger(imgBuffer1, deviceInfo.ImageWidth, deviceInfo.ImageHeight);
 
   ledOff();
 
-  saveFinger(imgBuffer1, deviceInfo.ImageWidth * deviceInfo.ImageHeight);
+  saveFinger(imgBuffer1, deviceInfo.ImageWidth, deviceInfo.ImageHeight);
 
   return 0;
 }
