@@ -34,7 +34,7 @@ clean :
 
 pi : $(TARGET_PI)
 $(TARGET_PI) :
-	$(CPP) $(CFLAGS) $(INCPATH_PI) -D_FDU05 -o $(TARGET_PI) ./src/leitor.cpp $(LIBS_PI) -lsgfplib -lsgnfiq -lsgimage -lsgfpamx -lsgfdu05 -lusb -lpthread 
+	$(CPP) $(CFLAGS) $(INCPATH_PI) -D_FDU05 -o $(TARGET_PI) ./src/leitor.cpp $(LIBS_PI) -lsgfplib -lsgnfiq -lsgfpamx -lsgfdu05 -lusb -lpthread 
 
 
 
