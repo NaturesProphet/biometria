@@ -18,6 +18,28 @@
 
 LPSGFPM sdk = NULL;
 
+void ledOn()
+{
+  // acende o led
+  long err = sdk->SetLedOn(true);
+  if (err != SGFDX_ERROR_NONE)
+  {
+    printf("ERRO - sgfplib->SetLedOn(true); retornou um código inesperado: %ld\n", err);
+    exit(err);
+  }
+}
+
+void ledOff()
+{
+  // apaga o led
+  long err = sdk->SetLedOn(false);
+  if (err != SGFDX_ERROR_NONE)
+  {
+    printf("ERRO - sgfplib->SetLedOn(false); retornou um código inesperado: %ld\n", err);
+    exit(err);
+  }
+}
+
 bool isGoodQuality(BYTE *buffer, DWORD width, DWORD height, long quality)
 {
   DWORD img_qlty;
@@ -25,6 +47,7 @@ bool isGoodQuality(BYTE *buffer, DWORD width, DWORD height, long quality)
   if (err != SGFDX_ERROR_NONE || !img_qlty)
   {
     printf("ERRO - sdk->GetImageQuality(width, height, buffer, &img_qlty) retornou um código inesperado: %ld\n", err);
+    ledOff();
     exit(err);
   }
   if (img_qlty < quality)
@@ -46,6 +69,7 @@ BYTE *GetFinger(BYTE *buffer, DWORD width, DWORD height)
     if (err == SGFDX_ERROR_TIME_OUT)
     {
       printf("Tempo excedido. Tente novamente.\n");
+      ledOff();
       exit(err);
     }
     else if (err != SGFDX_ERROR_WRONG_IMAGE)
@@ -67,33 +91,19 @@ BYTE *GetFinger(BYTE *buffer, DWORD width, DWORD height)
 
 void saveFinger(BYTE *buffer, DWORD width, DWORD height)
 {
-  FILE *fp = fopen("dedo.raw", "wb");
-  fwrite(buffer, sizeof(BYTE), width * height, fp);
-  fclose(fp);
-  fp = NULL;
+  try
+  {
+    FILE *fp = fopen("dedo.raw", "wb");
+    fwrite(buffer, sizeof(BYTE), width * height, fp);
+    fclose(fp);
+    fp = NULL;
+  }
+  catch (int err)
+  {
+    printf("Erro ao tentar salvar a foto do dedo no disco. Codigo: %d", err);
+    exit(err);
+  }
   printf("Impressão digital salva com sucesso.\n");
-}
-
-void ledOn()
-{
-  // acende o led
-  long err = sdk->SetLedOn(true);
-  if (err != SGFDX_ERROR_NONE)
-  {
-    printf("ERRO - sgfplib->SetLedOn(true); retornou um código inesperado: %ld\n", err);
-    exit(err);
-  }
-}
-
-void ledOff()
-{
-  // apaga o led
-  long err = sdk->SetLedOn(false);
-  if (err != SGFDX_ERROR_NONE)
-  {
-    printf("ERRO - sgfplib->SetLedOn(false); retornou um código inesperado: %ld\n", err);
-    exit(err);
-  }
 }
 
 int main(int argc, char **argv)
