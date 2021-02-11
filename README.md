@@ -1,4 +1,4 @@
-# Leitor Biométrico em C
+# Leitor e comparador Biométrico em C
 
 Escrito para funcionar especificamente com o dispositivo SecuGen Hamster PRO 20. Não irá funcionar com outros dispositivos!
 
@@ -13,3 +13,5 @@ make pi
 ```
 
 Os executaveis estarão disponíveis em ./bin
+
+Depois eu documento essa bagaça direito, por enqto é só confiar q funciona xD

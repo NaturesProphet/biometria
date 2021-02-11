@@ -16,21 +16,71 @@
 #include <sys/msg.h>
 #include "sgfplib.h" // lib importada dinamicamente via Makefile, depende do sistema alvo (linux ou pi)
 
-LPSGFPM sgfplib = NULL;
+LPSGFPM sdk = NULL;
+
+BYTE *GetFinger(BYTE *buffer)
+{
+  long err;
+  do
+  {
+    err = sdk->GetImageEx(buffer, 10000, NULL, 80);
+    if (err != SGFDX_ERROR_NONE)
+    {
+      if (err != SGFDX_ERROR_WRONG_IMAGE)
+      {
+        printf("ERRO - sdk->GetImage(buffer) retornou um código inesperado: %ld\n", err);
+        exit(err);
+      }
+    }
+  } while (err != 0);
+
+  return buffer;
+}
+
+void saveFinger(BYTE *buffer, long size)
+{
+  FILE *fp = fopen("dedo.raw", "wb");
+  fwrite(buffer, sizeof(BYTE), size, fp);
+  fclose(fp);
+  fp = NULL;
+  printf("Impressão digital salva com sucesso.\n");
+}
+
+void ledOn()
+{
+  // acende o led
+  long err = sdk->SetLedOn(true);
+  if (err != SGFDX_ERROR_NONE)
+  {
+    printf("ERRO - sgfplib->SetLedOn(true); retornou um código inesperado: %ld\n", err);
+    exit(err);
+  }
+}
+
+void ledOff()
+{
+  // acende o led
+  long err = sdk->SetLedOn(false);
+  if (err != SGFDX_ERROR_NONE)
+  {
+    printf("ERRO - sgfplib->SetLedOn(false); retornou um código inesperado: %ld\n", err);
+    exit(err);
+  }
+}
 
 int main(int argc, char **argv)
 {
   long err;                     // recebe o codigo de erro ou sucesso de cada chamada do SDK
-  BYTE *imageBuffer1;           // ponteiro pra memória onde será posicionada a imagem escaneada do dedo
+  BYTE *imgBuffer1;             // ponteiro pra memória onde será posicionada a imagem escaneada do dedo
   SGDeviceInfoParam deviceInfo; // estrutura q recebe as informações do dispositivo
 
   printf("\n-------------------------------------\n");
-  printf("AUIM Leitor biométrico\n");
+  printf("AUIM Leitor biométrico iniciando...\n");
   printf("-------------------------------------\n");
 
   // Instancia o objeto SDK
-  err = CreateSGFPMObject(&sgfplib);
-  if (!sgfplib)
+  err = CreateSGFPMObject(&sdk);
+  if (!sdk)
   {
     printf("ERRO - Incapaz de instanciar um objeto do SDK\n");
     exit(-1);
@@ -43,7 +93,7 @@ int main(int argc, char **argv)
   }
 
   // inicializa o modulo
-  err = sgfplib->Init(SG_DEV_AUTO);
+  err = sdk->Init(SG_DEV_AUTO);
   if (err != SGFDX_ERROR_NONE)
   {
     printf("ERRO - Init(SG_DEV_AUTO) retornou um código inesperado: %ld\n", err);
@@ -51,23 +101,15 @@ int main(int argc, char **argv)
   }
 
   // Abre o dispositivo
-  err = sgfplib->OpenDevice(0);
+  err = sdk->OpenDevice(0);
   if (err != SGFDX_ERROR_NONE)
   {
     printf("ERRO - sgfplib->OpenDevice(0) retornou um código inesperado: %ld\n", err);
     exit(err);
   }
 
-  // // acende o led
-  // err = sgfplib->SetLedOn(true);
-  // if (err != SGFDX_ERROR_NONE)
-  // {
-  //   printf("ERRO - sgfplib->SetLedOn(true); retornou um código inesperado: %ld\n", err);
-  //   exit(err);
-  // }
-
   // Recebe informações do dispositivo.
-  err = sgfplib->GetDeviceInfo(&deviceInfo);
+  err = sdk->GetDeviceInfo(&deviceInfo);
   if (err != SGFDX_ERROR_NONE)
   {
     printf("ERRO - sgfplib->GetDeviceInfo(&deviceInfo) retornou um código inesperado: %ld\n", err);
@@ -75,5 +117,16 @@ int main(int argc, char **argv)
   }
 
   // reserva memória para a imagem a ser escaneada com o tamanho informado pelo dispositivo
-  imageBuffer1 = (BYTE *)malloc(deviceInfo.ImageWidth * deviceInfo.ImageHeight);
+  imgBuffer1 = (BYTE *)malloc(deviceInfo.ImageWidth * deviceInfo.ImageHeight);
+
+  ledOn();
+
+  printf("METE O DEDO LÁ....\n");
+  imgBuffer1 = GetFinger(imgBuffer1);
+
+  ledOff();
+
+  saveFinger(imgBuffer1, deviceInfo.ImageWidth * deviceInfo.ImageHeight);
+
+  return 0;
 }
