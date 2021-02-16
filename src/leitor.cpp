@@ -10,13 +10,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/msg.h>
 #include "sgfplib.h" // lib importada dinamicamente via Makefile, depende do sistema alvo (linux ou pi)
 
 LPSGFPM sdk = NULL;
+long quality = 50; // qualidade mínima das imagens a serem geradas
 
 void ledOn()
 {
@@ -40,7 +37,7 @@ void ledOff()
   }
 }
 
-bool isGoodQuality(BYTE *buffer, DWORD width, DWORD height, long quality)
+bool isGoodQuality(BYTE *buffer, DWORD width, DWORD height)
 {
   DWORD img_qlty;
   long err = sdk->GetImageQuality(width, height, buffer, &img_qlty);
@@ -63,7 +60,7 @@ bool isGoodQuality(BYTE *buffer, DWORD width, DWORD height, long quality)
 BYTE *GetFinger(BYTE *buffer, DWORD width, DWORD height)
 {
   long err;
-  err = sdk->GetImageEx(buffer, 5000, NULL, 80);
+  err = sdk->GetImageEx(buffer, 5000, NULL, quality);
   if (err != SGFDX_ERROR_NONE)
   {
     if (err == SGFDX_ERROR_TIME_OUT)
@@ -78,7 +75,7 @@ BYTE *GetFinger(BYTE *buffer, DWORD width, DWORD height)
       exit(err);
     }
   }
-  if (isGoodQuality(buffer, width, height, 75))
+  if (isGoodQuality(buffer, width, height))
   {
     return buffer;
   }
@@ -89,12 +86,39 @@ BYTE *GetFinger(BYTE *buffer, DWORD width, DWORD height)
   }
 }
 
+BYTE *createTemplate(BYTE *buffer)
+{
+  long err;
+  BYTE *minBuffer;
+  unsigned long maxTemplateSize;
+  err = sdk->GetMaxTemplateSize(&maxTemplateSize);
+  if (err != SGFDX_ERROR_NONE)
+  {
+    printf("ERRO - sdk->GetMaxTemplateSize(&maxTemplateSize) retornou um código inesperado: %ld\n", err);
+    exit(err);
+  }
+  BYTE *minTemplate = new BYTE[maxTemplateSize];
+  SGFingerInfo *finger_info = (SGFingerInfo *)malloc(sizeof(SGFingerInfo));
+  finger_info->FingerNumber = 1;
+  finger_info->ImageQuality = quality;
+  finger_info->ImpressionType = SG_IMPTYPE_LP;
+  finger_info->ViewNumber = 1;
+  err = sdk->CreateTemplate(finger_info, buffer, minTemplate);
+  if (err != SGFDX_ERROR_NONE)
+  {
+    printf("ERRO - sdk->CreateTemplate(finger_info, buffer, minTemplate) retornou um código inesperado: %ld\n", err);
+    exit(err);
+  }
+  return minTemplate;
+}
+
 void saveFinger(BYTE *buffer, DWORD width, DWORD height)
 {
+  BYTE *fingerTemplate = createTemplate(buffer);
   try
   {
-    FILE *fp = fopen("dedo.raw", "wb");
-    fwrite(buffer, sizeof(BYTE), width * height, fp);
+    FILE *fp = fopen("template.raw", "wb");
+    fwrite(fingerTemplate, sizeof(BYTE), width * height, fp);
     fclose(fp);
     fp = NULL;
   }
