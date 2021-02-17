@@ -8,13 +8,13 @@ typedef struct
   char *writePath;
   char *fileName;
   char *path;
-} Args;
+} ReaderArgs;
 
-Args *getArgs(int argc, char **argv)
+ReaderArgs *getReaderArgs(int argc, char **argv)
 {
 
-  Args *conf;
-  conf = (Args *)malloc(sizeof(Args));
+  ReaderArgs *conf;
+  conf = (ReaderArgs *)malloc(sizeof(ReaderArgs));
   conf->quality = 60;
   conf->writePath = (char *)"./";
   conf->fileName = (char *)"dedo.raw";

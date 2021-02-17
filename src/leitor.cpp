@@ -37,7 +37,7 @@ void ledOff()
   }
 }
 
-bool isGoodQuality(BYTE *buffer, DWORD width, DWORD height, Args *conf)
+bool isGoodQuality(BYTE *buffer, DWORD width, DWORD height, ReaderArgs *conf)
 {
   DWORD img_qlty;
   long err = sdk->GetImageQuality(width, height, buffer, &img_qlty);
@@ -57,7 +57,7 @@ bool isGoodQuality(BYTE *buffer, DWORD width, DWORD height, Args *conf)
   }
 }
 
-BYTE *GetFinger(BYTE *buffer, DWORD width, DWORD height, Args *conf)
+BYTE *GetFinger(BYTE *buffer, DWORD width, DWORD height, ReaderArgs *conf)
 {
   long err;
   err = sdk->GetImageEx(buffer, 5000, NULL, conf->quality);
@@ -86,7 +86,7 @@ BYTE *GetFinger(BYTE *buffer, DWORD width, DWORD height, Args *conf)
   }
 }
 
-BYTE *createTemplate(BYTE *buffer, Args *conf)
+BYTE *createTemplate(BYTE *buffer, ReaderArgs *conf)
 {
   long err;
   BYTE *minBuffer;
@@ -112,7 +112,7 @@ BYTE *createTemplate(BYTE *buffer, Args *conf)
   return minTemplate;
 }
 
-void saveTemplate(BYTE *fingerTemplate, DWORD width, DWORD height, Args *conf)
+void saveTemplate(BYTE *fingerTemplate, DWORD width, DWORD height, ReaderArgs *conf)
 {
   try
   {
@@ -131,10 +131,10 @@ void saveTemplate(BYTE *fingerTemplate, DWORD width, DWORD height, Args *conf)
 
 int main(int argc, char **argv)
 {
-  long err;                         // recebe o codigo de erro ou sucesso de cada chamada do SDK
-  BYTE *imgBuffer1;                 // ponteiro pra memória onde será posicionada a imagem escaneada do dedo
-  SGDeviceInfoParam deviceInfo;     // estrutura q recebe as informações do dispositivo
-  Args *conf = getArgs(argc, argv); // Configurações da execução
+  long err;                                     // recebe o codigo de erro ou sucesso de cada chamada do SDK
+  BYTE *imgBuffer1;                             // ponteiro pra memória onde será posicionada a imagem escaneada do dedo
+  SGDeviceInfoParam deviceInfo;                 // estrutura q recebe as informações do dispositivo
+  ReaderArgs *conf = getReaderArgs(argc, argv); // Configurações da execução
 
   printf("\n-------------------------------------\n");
   printf("AUIM Leitor biométrico iniciando...\n");
@@ -187,10 +187,8 @@ int main(int argc, char **argv)
   imgBuffer1 = GetFinger(imgBuffer1, deviceInfo.ImageWidth, deviceInfo.ImageHeight, conf);
 
   ledOff();
-  printf("0x124      \n");
   BYTE *fingerTemplate = createTemplate(imgBuffer1, conf);
 
-  printf("0x123412      \n");
   saveTemplate(fingerTemplate, deviceInfo.ImageWidth, deviceInfo.ImageHeight, conf);
 
   return 0;
