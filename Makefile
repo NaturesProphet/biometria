@@ -49,10 +49,10 @@ $(TARGET_PI_COMPARADOR) :
 
 
 piinstall: $(TARGET_PI_LEITOR) $(TARGET_PI_COMPARADOR)
-	sudo cp $(TARGET_PI_LEITOR) /bin/leitor && sudo cp $(TARGET_PI_COMPARADOR) /bin/comparador
+	cp $(TARGET_PI_LEITOR) /bin/leitor && sudo cp $(TARGET_PI_COMPARADOR) /bin/comparador
 
 install: $(TARGET_LEITOR) $(TARGET_COMPARADOR)
-	sudo cp $(TARGET_LEITOR) /bin/leitor && sudo cp $(TARGET_COMPARADOR) /bin/comparador
+	cp $(TARGET_LEITOR) /bin/leitor && sudo cp $(TARGET_COMPARADOR) /bin/comparador
 
 uninstall: /bin/leitor /bin/comparador
-	sudo rm /bin/leitor && sudo rm /bin/comparador
+	rm /bin/leitor && sudo rm /bin/comparador

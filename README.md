@@ -16,25 +16,26 @@ Os executaveis estarão disponíveis em ./bin
 
 ## Instalar os executaveis
 Para instalar os executaveis e poder invocalos direto de qualquer terminal:
+
 PI:
 ``` bash
 make clean
-make install
-make piinstall
+make pi
+sudo make piinstall
 ```
 
 PC:
 
 ```bash
 make clean
-make install
-make install
+make
+sudo make install
 ```
 
 Para desinstalar, em qualquer plataforma, execute
 
 ```bash
-make uninstall
+sudo make uninstall
 ```
 
 
