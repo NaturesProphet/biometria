@@ -10,10 +10,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "./args.h"  // minha lib para tratar os argumentos de terminal
 #include "sgfplib.h" // lib importada dinamicamente via Makefile, depende do sistema alvo (linux ou pi)
 
 LPSGFPM sdk = NULL;
-long quality = 50; // qualidade mínima das imagens a serem geradas
 
 void ledOn()
 {
@@ -37,7 +37,7 @@ void ledOff()
   }
 }
 
-bool isGoodQuality(BYTE *buffer, DWORD width, DWORD height)
+bool isGoodQuality(BYTE *buffer, DWORD width, DWORD height, Args *conf)
 {
   DWORD img_qlty;
   long err = sdk->GetImageQuality(width, height, buffer, &img_qlty);
@@ -47,7 +47,7 @@ bool isGoodQuality(BYTE *buffer, DWORD width, DWORD height)
     ledOff();
     exit(err);
   }
-  if (img_qlty < quality)
+  if (img_qlty < conf->quality)
   {
     return false;
   }
@@ -57,10 +57,10 @@ bool isGoodQuality(BYTE *buffer, DWORD width, DWORD height)
   }
 }
 
-BYTE *GetFinger(BYTE *buffer, DWORD width, DWORD height)
+BYTE *GetFinger(BYTE *buffer, DWORD width, DWORD height, Args *conf)
 {
   long err;
-  err = sdk->GetImageEx(buffer, 5000, NULL, quality);
+  err = sdk->GetImageEx(buffer, 5000, NULL, conf->quality);
   if (err != SGFDX_ERROR_NONE)
   {
     if (err == SGFDX_ERROR_TIME_OUT)
@@ -75,7 +75,7 @@ BYTE *GetFinger(BYTE *buffer, DWORD width, DWORD height)
       exit(err);
     }
   }
-  if (isGoodQuality(buffer, width, height))
+  if (isGoodQuality(buffer, width, height, conf))
   {
     return buffer;
   }
@@ -86,7 +86,7 @@ BYTE *GetFinger(BYTE *buffer, DWORD width, DWORD height)
   }
 }
 
-BYTE *createTemplate(BYTE *buffer)
+BYTE *createTemplate(BYTE *buffer, Args *conf)
 {
   long err;
   BYTE *minBuffer;
@@ -100,7 +100,7 @@ BYTE *createTemplate(BYTE *buffer)
   BYTE *minTemplate = new BYTE[maxTemplateSize];
   SGFingerInfo *finger_info = (SGFingerInfo *)malloc(sizeof(SGFingerInfo));
   finger_info->FingerNumber = 1;
-  finger_info->ImageQuality = quality;
+  finger_info->ImageQuality = conf->quality;
   finger_info->ImpressionType = SG_IMPTYPE_LP;
   finger_info->ViewNumber = 1;
   err = sdk->CreateTemplate(finger_info, buffer, minTemplate);
@@ -112,12 +112,11 @@ BYTE *createTemplate(BYTE *buffer)
   return minTemplate;
 }
 
-void saveFinger(BYTE *buffer, DWORD width, DWORD height)
+void saveTemplate(BYTE *fingerTemplate, DWORD width, DWORD height, Args *conf)
 {
-  BYTE *fingerTemplate = createTemplate(buffer);
   try
   {
-    FILE *fp = fopen("template.raw", "wb");
+    FILE *fp = fopen(conf->path, "wb");
     fwrite(fingerTemplate, sizeof(BYTE), width * height, fp);
     fclose(fp);
     fp = NULL;
@@ -132,9 +131,10 @@ void saveFinger(BYTE *buffer, DWORD width, DWORD height)
 
 int main(int argc, char **argv)
 {
-  long err;                     // recebe o codigo de erro ou sucesso de cada chamada do SDK
-  BYTE *imgBuffer1;             // ponteiro pra memória onde será posicionada a imagem escaneada do dedo
-  SGDeviceInfoParam deviceInfo; // estrutura q recebe as informações do dispositivo
+  long err;                         // recebe o codigo de erro ou sucesso de cada chamada do SDK
+  BYTE *imgBuffer1;                 // ponteiro pra memória onde será posicionada a imagem escaneada do dedo
+  SGDeviceInfoParam deviceInfo;     // estrutura q recebe as informações do dispositivo
+  Args *conf = getArgs(argc, argv); // Configurações da execução
 
   printf("\n-------------------------------------\n");
   printf("AUIM Leitor biométrico iniciando...\n");
@@ -184,11 +184,14 @@ int main(int argc, char **argv)
   ledOn();
 
   printf("METE O DEDO LÁ....\n");
-  imgBuffer1 = GetFinger(imgBuffer1, deviceInfo.ImageWidth, deviceInfo.ImageHeight);
+  imgBuffer1 = GetFinger(imgBuffer1, deviceInfo.ImageWidth, deviceInfo.ImageHeight, conf);
 
   ledOff();
+  printf("0x124      \n");
+  BYTE *fingerTemplate = createTemplate(imgBuffer1, conf);
 
-  saveFinger(imgBuffer1, deviceInfo.ImageWidth, deviceInfo.ImageHeight);
+  printf("0x123412      \n");
+  saveTemplate(fingerTemplate, deviceInfo.ImageWidth, deviceInfo.ImageHeight, conf);
 
   return 0;
 }
