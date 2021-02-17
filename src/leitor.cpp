@@ -37,6 +37,16 @@ void ledOff()
   }
 }
 
+void getQuality(DWORD width, DWORD height, BYTE *imgBuf, DWORD *quality)
+{
+  long err = sdk->GetImageQuality(width, height, imgBuf, quality);
+  if (err != SGFDX_ERROR_NONE)
+  {
+    printf("ERRO - sdk->GetImageQuality(width, height, imgBuf, quality) retornou um código inesperado: %ld\n", err);
+    exit(err);
+  }
+}
+
 bool isGoodQuality(BYTE *buffer, DWORD width, DWORD height, ReaderArgs *conf)
 {
   DWORD img_qlty;
@@ -86,10 +96,12 @@ BYTE *GetFinger(BYTE *buffer, DWORD width, DWORD height, ReaderArgs *conf)
   }
 }
 
-BYTE *createTemplate(BYTE *buffer, ReaderArgs *conf)
+BYTE *createTemplate(BYTE *buffer, DWORD width, DWORD height, ReaderArgs *conf)
 {
   long err;
   BYTE *minBuffer;
+  DWORD *quality = (DWORD *)malloc(sizeof(DWORD));
+  getQuality(width, height, buffer, quality);
   unsigned long maxTemplateSize;
   err = sdk->GetMaxTemplateSize(&maxTemplateSize);
   if (err != SGFDX_ERROR_NONE)
@@ -100,7 +112,7 @@ BYTE *createTemplate(BYTE *buffer, ReaderArgs *conf)
   BYTE *minTemplate = new BYTE[maxTemplateSize];
   SGFingerInfo *finger_info = (SGFingerInfo *)malloc(sizeof(SGFingerInfo));
   finger_info->FingerNumber = 1;
-  finger_info->ImageQuality = conf->quality;
+  finger_info->ImageQuality = *quality;
   finger_info->ImpressionType = SG_IMPTYPE_LP;
   finger_info->ViewNumber = 1;
   err = sdk->CreateTemplate(finger_info, buffer, minTemplate);
@@ -187,7 +199,7 @@ int main(int argc, char **argv)
   imgBuffer1 = GetFinger(imgBuffer1, deviceInfo.ImageWidth, deviceInfo.ImageHeight, conf);
 
   ledOff();
-  BYTE *fingerTemplate = createTemplate(imgBuffer1, conf);
+  BYTE *fingerTemplate = createTemplate(imgBuffer1, deviceInfo.ImageWidth, deviceInfo.ImageHeight, conf);
 
   saveTemplate(fingerTemplate, deviceInfo.ImageWidth, deviceInfo.ImageHeight, conf);
 
