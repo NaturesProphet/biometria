@@ -61,8 +61,8 @@ Os comandos estarão disponíveis com os nomes "leitor" e "comparador", podendo 
 
 Invoque o leitor passando as flags contendo:
 
-    > Diretorio onde salvar o arquivo (-wp <local>)
-    > Nome do arquivo (-fn <nome>)
+    > Diretorio onde salvar o arquivo (-d <local>)
+    > Nome do arquivo (-n <nome>)
     > Qualidade mínima da imagem (-q <valor>)
 
 Exemplo:
@@ -77,6 +77,11 @@ leitor -q 70 -d ~/templates/ -n dedo1.raw
 Sempre coloque o "/" no final do diretorio onde deseja salvar o arquivo, como feito no exemplo.
 
 ## Comparar uma impressão digital atual com os templates previamente registrados
+
+Invoque o comparador passando as flags contendo:
+
+    > Diretorio onde ler os templates registrados (-d <local>)
+    > Qualidade mínima da imagem a ser comparada (-q <valor>)
 
 Com os templates já registrados em disco, agora podemos comparar uma impressão digital atual lida pelo sensor com todos os templates já registrados, e então retornar o template que deu match.
 
