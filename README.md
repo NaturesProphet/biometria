@@ -2,6 +2,22 @@
 
 Escrito para funcionar especificamente com o dispositivo SecuGen Hamster PRO 20. Não irá funcionar com outros dispositivos!
 
+## Exemplos de uso:
+
+________
+1. Registrar um dedo.
+
+![asd](./prints/registrar.png)
+
+2. Compararar impressão digital com um dedo cadastrado
+
+![asd](./prints/comparar1.png)
+
+3. Compararar impressão digital não cadastrada
+
+![asd](./prints/comparar2.png)
+
+
 ## Buildar no PC
 ```bash
 make
@@ -62,13 +78,13 @@ Sempre coloque o "/" no final do diretorio onde deseja salvar o arquivo, como fe
 
 ## Comparar uma impressão digital atual com os templates previamente registrados
 
-Esta parte está em desenvolvimento, mas funcionará de maneira similar a isso:
+Com os templates já registrados em disco, agora podemos comparar uma impressão digital atual lida pelo sensor com todos os templates já registrados, e então retornar o template que deu match.
 
 ```bash
 comparador -q 70 -d /home/pi/templates
 ```
 
-Mais detalhes serão adicionados aqui ao terminar essa etapa.
+de posse do nome do arquivo que deu match, o resto da lógica pode ser processado em outro serviço (API node).
 
 
 
