@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <dirent.h>
 #include "./args.h"  // minha lib para tratar os argumentos de terminal
 #include "sgfplib.h" // lib importada dinamicamente via Makefile, depende do sistema alvo (linux ou pi)
 
@@ -127,7 +128,7 @@ BYTE *createTemplate(BYTE *buffer, CompareArgs *conf)
   return minTemplate;
 }
 
-BYTE *getTemplatesFromDisk(SGDeviceInfoParam deviceInfo, CompareArgs *conf)
+BYTE *getTemplateFromDisk(char *path)
 {
   BYTE *templateBuffer;
   DWORD size;
@@ -141,7 +142,7 @@ BYTE *getTemplatesFromDisk(SGDeviceInfoParam deviceInfo, CompareArgs *conf)
   // reserva memória para a imagem a ser escaneada com o tamanho informado pelo dispositivo
   templateBuffer = (BYTE *)malloc(size);
 
-  FILE *fp = fopen("dedo.raw", "r");
+  FILE *fp = fopen(path, "r");
 
   if (fp != NULL)
   {
@@ -151,6 +152,11 @@ BYTE *getTemplatesFromDisk(SGDeviceInfoParam deviceInfo, CompareArgs *conf)
       fputs("Error reading file", stderr);
     }
     fclose(fp);
+  }
+  else
+  {
+    printf("Template não encontrado.\n");
+    exit(-1);
   }
 
   return templateBuffer;
@@ -174,6 +180,72 @@ bool compare(BYTE *fingerTemplate1, BYTE *fingerTemplate2)
   {
     return false;
   }
+}
+
+char *getTemplatePath(char *str1, char *str2)
+{
+  long size = strlen(str1) + strlen(str2);
+  char *newStr = (char *)malloc(sizeof(char) * size + 1);
+  int index = 0;
+  int i = 0;
+  while (str1[i] != '\0')
+  {
+    newStr[i] = str1[i];
+    i++;
+    index++;
+  }
+  i = 0;
+  while (str2[i] != '\0')
+  {
+    newStr[index] = str2[i];
+    i++;
+    index++;
+  }
+  newStr[index] = '\0';
+  return newStr;
+}
+
+bool isValidFilePath(char *templatePath)
+{
+  long size = strlen(templatePath);
+  char lastChar = templatePath[size - 1];
+  if (lastChar == '.')
+  {
+    return false;
+  }
+  else
+  {
+    return true;
+  }
+}
+
+char *login(BYTE *fingerTemplate1, CompareArgs *conf)
+{
+  DIR *dir;
+  struct dirent *lsdir;
+
+  dir = opendir(conf->templatesDir);
+
+  /* print all the files and directories within directory */
+  while ((lsdir = readdir(dir)) != NULL)
+  {
+    char *fileName = lsdir->d_name;
+    char *path = getTemplatePath(conf->templatesDir, fileName);
+    if (isValidFilePath(path))
+    {
+      BYTE *fingerTemplate2 = getTemplateFromDisk(path);
+      if (compare(fingerTemplate1, fingerTemplate2))
+      {
+        printf("Bateu! arquivo: %s\n", fileName);
+        closedir(dir);
+        return fileName;
+      }
+    }
+  }
+
+  closedir(dir);
+  printf("Nenhuma correspondência encontrada.\n");
+  exit(-69);
 }
 
 int main(int argc, char **argv)
@@ -235,17 +307,8 @@ int main(int argc, char **argv)
 
   ledOff();
   BYTE *fingerTemplate = createTemplate(imgBuffer1, conf);
-  BYTE *fingerTemplate2 = getTemplatesFromDisk(deviceInfo, conf);
 
-  bool match = compare(fingerTemplate, fingerTemplate2);
-  if (match)
-  {
-    printf("Bateu!\n");
-  }
-  else
-  {
-    printf("Não bateu!\n");
-  }
+  login(fingerTemplate, conf);
 
   return 0;
 }

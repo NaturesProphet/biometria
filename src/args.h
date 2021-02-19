@@ -83,6 +83,6 @@ CompareArgs *getCompareArgs(int argc, char **argv)
     }
   }
 
-  printf("Config: Ler templates localizados em %s com qualidade %ld\n", conf->templatesDir, conf->quality);
+  printf("Config: Ler templates localizados em %s e comparar com qualidade mínima %ld\n", conf->templatesDir, conf->quality);
   return conf;
 }
