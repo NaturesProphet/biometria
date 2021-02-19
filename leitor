@@ -1,3 +1,0 @@
-make clean
-make
-./bin/leitor/linux/leitor.o

@@ -55,7 +55,7 @@ Exemplo:
 
 
 ```bash
-leitor -q 70 -wp ~/templates/ -fn dedo1.raw
+leitor -q 70 -d ~/templates/ -n dedo1.raw
 ```
 
 Sempre coloque o "/" no final do diretorio onde deseja salvar o arquivo, como feito no exemplo.
@@ -65,7 +65,7 @@ Sempre coloque o "/" no final do diretorio onde deseja salvar o arquivo, como fe
 Esta parte está em desenvolvimento, mas funcionará de maneira similar a isso:
 
 ```bash
-comparador -q 70 -td /home/pi/templates
+comparador -q 70 -d /home/pi/templates
 ```
 
 Mais detalhes serão adicionados aqui ao terminar essa etapa.

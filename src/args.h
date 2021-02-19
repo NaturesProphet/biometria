@@ -38,12 +38,12 @@ ReaderArgs *getReaderArgs(int argc, char **argv)
       conf->quality = atoi(argv[i + 1]);
     }
 
-    if (strcmp(argv[i], "-wp") == 0)
+    if (strcmp(argv[i], "-d") == 0)
     {
       conf->writePath = argv[i + 1];
     }
 
-    if (strcmp(argv[i], "-fn") == 0)
+    if (strcmp(argv[i], "-n") == 0)
     {
       conf->fileName = argv[i + 1];
     }
@@ -77,7 +77,7 @@ CompareArgs *getCompareArgs(int argc, char **argv)
       conf->quality = atoi(argv[i + 1]);
     }
 
-    if (strcmp(argv[i], "-td") == 0)
+    if (strcmp(argv[i], "-d") == 0)
     {
       conf->templatesDir = argv[i + 1];
     }
