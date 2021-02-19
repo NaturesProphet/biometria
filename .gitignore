@@ -1,2 +1,4 @@
 *.raw
 templates/*
+test.c*
+*.out

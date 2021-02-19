@@ -114,7 +114,12 @@ BYTE *createTemplate(BYTE *buffer, CompareArgs *conf)
   finger_info->ImpressionType = SG_IMPTYPE_LP;
   finger_info->ViewNumber = 1;
   err = sdk->CreateTemplate(finger_info, buffer, minTemplate);
-  if (err != SGFDX_ERROR_NONE)
+  if (err == SGFDX_ERROR_EXTRACT_FAIL)
+  {
+    printf("ERRO 105 - Falha ao extrair o template do buffer.\n");
+    exit(err);
+  }
+  else if (err != SGFDX_ERROR_NONE)
   {
     printf("ERRO - sdk->CreateTemplate(finger_info, buffer, minTemplate) retornou um código inesperado: %ld\n", err);
     exit(err);
@@ -122,27 +127,33 @@ BYTE *createTemplate(BYTE *buffer, CompareArgs *conf)
   return minTemplate;
 }
 
-/*
-Mock experimental, apenas gera outro template on the fly para testar a comparação.
-*/
 BYTE *getTemplatesFromDisk(SGDeviceInfoParam deviceInfo, CompareArgs *conf)
 {
-  long err;
-  BYTE *imgBuffer2;
+  BYTE *templateBuffer;
+  DWORD size;
+  long err = sdk->GetMaxTemplateSize(&size);
+  if (err != SGFDX_ERROR_NONE)
+  {
+    printf("ERRO - sdk->GetMaxTemplateSize(&size) retornou um código inesperado: %ld\n", err);
+    exit(err);
+  }
 
   // reserva memória para a imagem a ser escaneada com o tamanho informado pelo dispositivo
-  imgBuffer2 = (BYTE *)malloc(deviceInfo.ImageWidth * deviceInfo.ImageHeight);
+  templateBuffer = (BYTE *)malloc(size);
 
-  ledOn();
+  FILE *fp = fopen("dedo.raw", "r");
 
-  printf("METE O DEDO LÁ....\n");
-  imgBuffer2 = GetFinger(imgBuffer2, deviceInfo.ImageWidth, deviceInfo.ImageHeight, conf);
+  if (fp != NULL)
+  {
+    fread(templateBuffer, sizeof(BYTE), size, fp);
+    if (ferror(fp) != 0)
+    {
+      fputs("Error reading file", stderr);
+    }
+    fclose(fp);
+  }
 
-  ledOff();
-  BYTE *fingerTemplate2 = createTemplate(imgBuffer2, conf);
-  free(imgBuffer2);
-
-  return fingerTemplate2;
+  return templateBuffer;
 }
 
 bool compare(BYTE *fingerTemplate1, BYTE *fingerTemplate2)
@@ -226,7 +237,15 @@ int main(int argc, char **argv)
   BYTE *fingerTemplate = createTemplate(imgBuffer1, conf);
   BYTE *fingerTemplate2 = getTemplatesFromDisk(deviceInfo, conf);
 
-  compare(fingerTemplate, fingerTemplate2);
+  bool match = compare(fingerTemplate, fingerTemplate2);
+  if (match)
+  {
+    printf("Bateu!\n");
+  }
+  else
+  {
+    printf("Não bateu!\n");
+  }
 
   return 0;
 }

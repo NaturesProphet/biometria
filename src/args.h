@@ -61,7 +61,7 @@ CompareArgs *getCompareArgs(int argc, char **argv)
 
   CompareArgs *conf;
   conf = (CompareArgs *)malloc(sizeof(CompareArgs));
-  conf->templatesDir = (char *)"./templates";
+  conf->templatesDir = (char *)"./";
   conf->quality = 60;
 
   if (argc % 2 == 0)

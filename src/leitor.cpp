@@ -99,7 +99,6 @@ BYTE *GetFinger(BYTE *buffer, DWORD width, DWORD height, ReaderArgs *conf)
 BYTE *createTemplate(BYTE *buffer, DWORD width, DWORD height, ReaderArgs *conf)
 {
   long err;
-  BYTE *minBuffer;
   DWORD *quality = (DWORD *)malloc(sizeof(DWORD));
   getQuality(width, height, buffer, quality);
   unsigned long maxTemplateSize;
@@ -111,7 +110,7 @@ BYTE *createTemplate(BYTE *buffer, DWORD width, DWORD height, ReaderArgs *conf)
   }
   BYTE *minTemplate = new BYTE[maxTemplateSize];
   SGFingerInfo *finger_info = (SGFingerInfo *)malloc(sizeof(SGFingerInfo));
-  finger_info->FingerNumber = 1;
+  finger_info->FingerNumber = SG_FINGPOS_UK;
   finger_info->ImageQuality = *quality;
   finger_info->ImpressionType = SG_IMPTYPE_LP;
   finger_info->ViewNumber = 1;
