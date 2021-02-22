@@ -112,5 +112,9 @@ CompareArgs *getCompareArgs(int argc, char *argv[])
       printf("Argumentos inválidos ignorados: %s\n", argv[optind]);
     }
   }
+  if (conf->verbose)
+  {
+    printf("Lendo templates de %s e comparando com qualidade mínima %ld", conf->templatesDir, conf->quality);
+  }
   return conf;
 }

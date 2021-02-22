@@ -64,17 +64,20 @@ Invoque o leitor passando as flags contendo:
     > Diretorio onde salvar o arquivo (-d <local>)
     > Nome do arquivo (-n <nome>)
     > Qualidade mínima da imagem (-q <valor>)
+    > Modo verboso ativo (-v)
 
 Exemplo:
 
-> Salvar um template chamado dedo1.raw em ~/templates/ com qualidade mínima 70:
+> Salvar um template chamado dedo1.raw em ~/templates/ com qualidade mínima 70 com modo verboso ativo:
 
 
 ```bash
-leitor -q 70 -d ~/templates/ -n dedo1.raw
+leitor -q 70 -d ~/templates/ -n dedo1.raw -v
 ```
 
 Sempre coloque o "/" no final do diretorio onde deseja salvar o arquivo, como feito no exemplo.
+
+O modo verboso é desativado por padrão, para manter assim, basta não passar a flag "-v".
 
 ## Comparar uma impressão digital atual com os templates previamente registrados
 
@@ -82,15 +85,21 @@ Invoque o comparador passando as flags contendo:
 
     > Diretorio onde ler os templates registrados (-d <local>)
     > Qualidade mínima da imagem a ser comparada (-q <valor>)
+    > Modo verboso ativo (-v)
 
 Com os templates já registrados em disco, agora podemos comparar uma impressão digital atual lida pelo sensor com todos os templates já registrados, e então retornar o template que deu match.
 
+Exemplo:
+
+> Comparar uma impressão atual com os templates registrados em /home/pi/templates usando qualidade mínima 70 e com modo verboso ativo
+
 ```bash
-comparador -q 70 -d /home/pi/templates
+comparador -q 70 -d /home/pi/templates -v
 ```
 
 de posse do nome do arquivo que deu match, o resto da lógica pode ser processado em outro serviço (API node).
 
+Observe que para facilitar a integração com serviços externos (API Node) o modo verboso está desativado por padrão, assim, o resultado em caso de sucesso (0) sempre printará apenas o nome do arquivo que bateu, facilitando a leitura pela chamada da API.
 
 
 # INSTALAÇÃO DAS DEPENDÊNCIAS
