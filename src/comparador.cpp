@@ -236,7 +236,11 @@ char *login(BYTE *fingerTemplate1, CompareArgs *conf)
       BYTE *fingerTemplate2 = getTemplateFromDisk(path);
       if (compare(fingerTemplate1, fingerTemplate2))
       {
-        printf("Bateu! arquivo: %s\n", fileName);
+        if (conf->verbose)
+        {
+          printf("Correspondencia encontrada!\nnome do arquivo: ");
+        }
+        printf("%s\n", fileName);
         closedir(dir);
         return fileName;
       }
@@ -255,9 +259,12 @@ int main(int argc, char **argv)
   SGDeviceInfoParam deviceInfo;                   // estrutura q recebe as informações do dispositivo
   CompareArgs *conf = getCompareArgs(argc, argv); // Configurações da execução
 
-  printf("\n-------------------------------------\n");
-  printf("AUIM Comparador biométrico iniciando...\n");
-  printf("-------------------------------------\n");
+  if (conf->verbose)
+  {
+    printf("\n-------------------------------------\n");
+    printf("AUIM Comparador biométrico iniciando...\n");
+    printf("-------------------------------------\n");
+  }
 
   // Instancia o objeto SDK
   err = CreateSGFPMObject(&sdk);
@@ -302,7 +309,11 @@ int main(int argc, char **argv)
 
   ledOn();
 
-  printf("METE O DEDO LÁ....\n");
+  if (conf->verbose)
+  {
+    printf("METE O DEDO LÁ....\n");
+  }
+
   imgBuffer1 = GetFinger(imgBuffer1, deviceInfo.ImageWidth, deviceInfo.ImageHeight, conf);
 
   ledOff();

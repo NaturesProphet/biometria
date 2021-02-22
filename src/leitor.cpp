@@ -137,7 +137,10 @@ void saveTemplate(BYTE *fingerTemplate, DWORD width, DWORD height, ReaderArgs *c
     printf("Erro ao tentar salvar a foto do dedo no disco. Codigo: %d", err);
     exit(err);
   }
-  printf("Impressão digital salva com sucesso.\n");
+  if (conf->verbose)
+  {
+    printf("Impressão digital salva com sucesso.\n");
+  }
 }
 
 int main(int argc, char **argv)
@@ -147,9 +150,12 @@ int main(int argc, char **argv)
   SGDeviceInfoParam deviceInfo;                 // estrutura q recebe as informações do dispositivo
   ReaderArgs *conf = getReaderArgs(argc, argv); // Configurações da execução
 
-  printf("\n-------------------------------------\n");
-  printf("AUIM Leitor biométrico iniciando...\n");
-  printf("-------------------------------------\n");
+  if (conf->verbose)
+  {
+    printf("\n-------------------------------------\n");
+    printf("AUIM Leitor biométrico iniciando...\n");
+    printf("-------------------------------------\n");
+  }
 
   // Instancia o objeto SDK
   err = CreateSGFPMObject(&sdk);
@@ -194,7 +200,10 @@ int main(int argc, char **argv)
 
   ledOn();
 
-  printf("METE O DEDO LÁ....\n");
+  if (conf->verbose)
+  {
+    printf("METE O DEDO LÁ....\n");
+  }
   imgBuffer1 = GetFinger(imgBuffer1, deviceInfo.ImageWidth, deviceInfo.ImageHeight, conf);
 
   ledOff();
