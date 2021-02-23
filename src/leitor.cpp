@@ -137,7 +137,7 @@ void saveTemplate(BYTE *fingerTemplate, DWORD width, DWORD height, ReaderArgs *c
     printf("Erro ao tentar salvar a foto do dedo no disco. Codigo: %d", err);
     exit(err);
   }
-  printf("Impressão digital salva com sucesso em %s.\n", conf->path);
+  printf("%s\n", conf->path);
 }
 
 int main(int argc, char **argv)

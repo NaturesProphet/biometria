@@ -240,7 +240,7 @@ char *login(BYTE *fingerTemplate1, CompareArgs *conf)
         {
           printf("Correspondencia encontrada!\nnome do arquivo: ");
         }
-        printf("%s\n", fileName);
+        printf("%s\n", path);
         closedir(dir);
         return fileName;
       }
