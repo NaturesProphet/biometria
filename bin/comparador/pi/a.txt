@@ -1,0 +1,1 @@
+o git ignora pastas vazias, então esse txt está aqui apenas pra essa pasta existir e não bugar o build do pi ;)
